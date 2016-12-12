@@ -7,6 +7,7 @@ public class SpeedCameraRecording
 	private final SpeedCamera cam;
 	private final Vehicle vehicle;
 	private final int vehicleSpeed;
+	private boolean priority = false; //defaults to false
 	public SpeedCameraRecording(SpeedCamera c, Vehicle v, int speed)
 	{
 		cam = c;
@@ -21,5 +22,13 @@ public class SpeedCameraRecording
 	}
 	public int getVehicleSpeed() {
 		return vehicleSpeed;
+	}
+	public void setPriority()
+	{
+		priority = true;
+	}
+	public boolean getPriority()
+	{
+		return priority;
 	}
 }

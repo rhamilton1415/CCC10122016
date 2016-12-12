@@ -72,6 +72,11 @@ public class SpeedCamera
 	{
 		Random r = new Random();
 		int vSpeed = (speedLimit/2)+r.nextInt(speedLimit);
-		recBackLog.add(new SpeedCameraRecording(this, Vehicle.generateVehicle(),vSpeed));
+		SpeedCameraRecording sCR = new SpeedCameraRecording(this,Vehicle.generateVehicle(),vSpeed);
+		if(sCR.getVehicleSpeed()>this.speedLimit)
+		{
+			sCR.setPriority();
+		}
+		recBackLog.add(sCR);
 	}
 }
