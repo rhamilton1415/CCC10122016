@@ -1,21 +1,21 @@
-package uk.ac.ncl.b3013461.Cloud;
+package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.Random;
 
-public class SpeedCameraRecording 
+public class SpeedCameraRecording implements java.io.Serializable
 {
-	private final SpeedCamera cam;
+	private final String camID;
 	private final Vehicle vehicle;
 	private final int vehicleSpeed;
 	private boolean priority = false; //defaults to false
-	public SpeedCameraRecording(SpeedCamera c, Vehicle v, int speed)
+	public SpeedCameraRecording(String c, Vehicle v, int speed)
 	{
-		cam = c;
+		camID = c;
 		vehicle = v;
 		vehicleSpeed = speed;
 	}
-	public SpeedCamera getCam() {
-		return cam;
+	public String getCamID() {
+		return camID;
 	}
 	public Vehicle getVehicle() {
 		return vehicle;

@@ -1,4 +1,4 @@
-package uk.ac.ncl.b3013461.Cloud;
+package uk.ac.ncl.b3013461.Cloud.Camera;
 //Endpoint=sb://speedcamerasb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=9sG8mh6JbBbbBbrwv4z//DPuu+Zj0VFvrevhQkmWwvI=
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.table.*;

@@ -1,8 +1,8 @@
-package uk.ac.ncl.b3013461.Cloud;
+package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.Random;
 
-public class Vehicle 
+public class Vehicle implements java.io.Serializable
 {
 	private final String carReg;
 	private final VehicleType type;

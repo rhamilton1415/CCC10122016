@@ -1,4 +1,4 @@
-package uk.ac.ncl.b3013461.Cloud;
+package uk.ac.ncl.b3013461.Cloud.Camera;
 
 public enum VehicleType 
 {

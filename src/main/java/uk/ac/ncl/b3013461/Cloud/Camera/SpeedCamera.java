@@ -1,14 +1,15 @@
-package uk.ac.ncl.b3013461.Cloud;
+package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SpeedCamera 
+public class SpeedCamera implements java.io.Serializable
 {
 	private final String cameraID;
 	private final String streetName;
 	private final String area;
 	private final int speedLimit;
+	private ServiceBusInterface sBI;
 	private ArrayList<SpeedCameraRecording> recBackLog = new ArrayList<SpeedCameraRecording>();
 	
 	private SpeedCamera(String camID, String strName, String areaName, int spLimit)
@@ -17,6 +18,7 @@ public class SpeedCamera
 		streetName = strName;
 		area = areaName;
 		speedLimit = spLimit;
+		sBI = createServiceBusInterface();
 		//announce
 	}
 	public static SpeedCamera makeSpeedCamera(String config)
@@ -72,11 +74,36 @@ public class SpeedCamera
 	{
 		Random r = new Random();
 		int vSpeed = (speedLimit/2)+r.nextInt(speedLimit);
-		SpeedCameraRecording sCR = new SpeedCameraRecording(this,Vehicle.generateVehicle(),vSpeed);
+		SpeedCameraRecording sCR = new SpeedCameraRecording(this.getCameraID(),Vehicle.generateVehicle(),vSpeed);
 		if(sCR.getVehicleSpeed()>this.speedLimit)
 		{
 			sCR.setPriority();
 		}
 		recBackLog.add(sCR);
+	}
+	private ServiceBusInterface createServiceBusInterface()
+	{
+		String topicName = "speedcameratopic";
+		SubWithRules prioritySub = new SubWithRules("priority");
+		prioritySub.addRule("ruleone","priority = true");
+		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
+		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
+		SubWithRules sWR[] = {prioritySub,nonPrioritySub,vehicleCheckSub};
+		return new ServiceBusInterface(topicName, sWR);
+	}
+	public void sendRecordingBacklog()
+	{
+		for(int i = 0;i<recBackLog.size();i++)
+		{
+			if(sBI.sendSpeedCameraMessage(recBackLog.get(i)))
+			{
+				recBackLog.remove(i); //if the message sends successfully, the speed camera no longer needs to store the recording locally
+			}
+			else
+			{
+				System.out.println("Connection failed");
+				return; //connection failed
+			}
+		}
 	}
 }
