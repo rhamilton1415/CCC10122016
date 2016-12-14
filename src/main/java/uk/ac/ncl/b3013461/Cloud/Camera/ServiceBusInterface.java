@@ -15,7 +15,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.xml.datatype.*;
-public class ServiceBusInterface 
+public class ServiceBusInterface implements java.io.Serializable
 {
 	private final ServiceBusContract service;
 	private final String topicName;
@@ -57,23 +57,25 @@ public class ServiceBusInterface
 				{
 					try
 					{
-						//CreateRuleResult rR = service.createRule(topicName, subscriptions[i].getSub().getName(), subscriptions[i].getRules().get(j));
-						//System.out.println("New Rule for " + subscriptions[i].getSub().getName() + ": \""+subscriptions[i].getRules().get(j).getName()+"\"");
+						CreateRuleResult rR = service.createRule(topicName, subscriptions[i].getSub().getName(), subscriptions[i].getRules().get(j));
+						service.deleteRule(topicName,subscriptions[i].getSub().getName(),"$Default"); //default rule needs to be deleted if custom rules are specified
+						System.out.println("New Rule for " + subscriptions[i].getSub().getName() + ": \""+subscriptions[i].getRules().get(j).getName()+"\"");
 					}
 					catch(Exception e)
 					{
-						System.out.println(e.getMessage());
+						//rule already exists
 					}
 				}
 			}
 		}
 		catch(ServiceException e)
 		{
-			System.out.println("f");
+			System.out.println(e.getErrorMessage());
 		}
 		
 	}
 	
+	//senders
 	public boolean sendSpeedCameraMessage(SpeedCameraRecording sCR)
 	{
 		try
@@ -83,9 +85,37 @@ public class ServiceBusInterface
 			ObjectOutputStream oOS = new ObjectOutputStream(bAOS);
 			oOS.writeObject(sCR);
 			BrokeredMessage m = new BrokeredMessage(new ByteArrayInputStream(bAOS.toByteArray()));
-			
+			m.setProperty("Announcement", false); //Apparently default isn't false
+			if(sCR.getPriority())
+			{
+				m.setProperty("HighPriority", true);
+			}
+			else
+			{
+				m.setProperty("HighPriority", false);
+			}
+			m.setLabel("Speed Camera Recording");
 			service.sendTopicMessage(topicName, m);
-			System.out.println("Message sending succeeded");
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean sendSpeedCameraAnnouncement(SpeedCamera sC)
+	{
+		try
+		{
+			//Serialize the object for sending
+			ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
+			ObjectOutputStream oOS = new ObjectOutputStream(bAOS);
+			oOS.writeObject(sC.toString()); //sends a string from which an identical speed camera can be built
+			BrokeredMessage m = new BrokeredMessage(new ByteArrayInputStream(bAOS.toByteArray()));
+			m.setLabel("Speed Camera Announcement");
+			m.setProperty("Announcement", true);
+			service.sendTopicMessage(topicName, m);
 		}
 		catch(Exception e)
 		{
@@ -95,7 +125,39 @@ public class ServiceBusInterface
 		return true;
 	}
 	
-	public SpeedCameraRecording getMessage(String subscriptionName)
+	//receivers
+	/**
+	 * This will check the given subscription for messages with the label "Speed Camera Recording" and will return SpeedCameraRecording objects from valid messages
+	 * @param subscriptionName the name of the subscription to get messages from
+	 * @return SpeedCameraRecording the valid SpeedCameraRecording object or null if none exist
+	 */
+	public SpeedCameraRecording getSpeedCameraRecordingMessage(String subscriptionName)
+	{
+		try
+		{
+			ReceiveMessageOptions opts = ReceiveMessageOptions.DEFAULT;
+			opts.setReceiveMode(ReceiveMode.PEEK_LOCK);
+			ReceiveSubscriptionMessageResult resultSubMsg = service.receiveSubscriptionMessage(topicName, subscriptionName);
+			BrokeredMessage m = resultSubMsg.getValue();
+			if(m==null) //If there are no messages in this sub
+			{
+				System.out.println("No messages");
+			}
+			else if(m.getLabel().equals("Speed Camera Recording")) //If there is a message but it isn't a recording
+			{
+				ObjectInputStream in = new ObjectInputStream(m.getBody());
+				SpeedCameraRecording sCR = (SpeedCameraRecording)in.readObject();
+				service.deleteMessage(m);
+				return sCR;
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("No messages or Exception");
+		}
+		return null;
+	}
+	public SpeedCamera getSpeedCameraAnnouncement(String subscriptionName)
 	{
 		try
 		{
@@ -105,32 +167,35 @@ public class ServiceBusInterface
 			BrokeredMessage m = resultSubMsg.getValue();
 			if(m==null)
 			{
-				System.out.println("No messages");
+				System.out.println("No new Speed Camera Announcements");
 			}
-			else
+			else if(m.getLabel().equals("Speed Camera Announcement"))
 			{
-				//SpeedCameraRecording sCR = (SpeedCameraRecording) m.getProperty("SpeedCameraRecording");
 				ObjectInputStream in = new ObjectInputStream(m.getBody());
-				SpeedCameraRecording sCR = (SpeedCameraRecording)in.readObject();
-				System.out.println(sCR.getVehicleSpeed());
-				/*
-				byte[] b = new byte[200];
-				String s = null;
-				int numRead = m.getBody().read(b);
-				while(-1 != numRead)
-				{
-					s = new String(b);
-					s = s.trim();
-					System.out.print(s);
-					numRead = m.getBody().read(b);
-				}
-				*/
+				SpeedCamera sC = SpeedCamera.makeSpeedCamera((String)in.readObject()); //Speed Cameras are built with these strings 
+				service.deleteMessage(m);
+				System.out.println(sC.toString());
+				return sC;
 			}
+			System.out.println(m.getLabel());
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			System.out.println("Failure detected");
 		}
 		return null;
+	}
+	
+	public static ServiceBusInterface getVanillaSBI()
+	{
+		String topicName = "speedcameratopic";
+		SubWithRules prioritySub = new SubWithRules("priority");
+		prioritySub.addRule("ruleone","HighPriority = true");
+		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
+		SubWithRules announcementsSub = new SubWithRules("announcements");
+		announcementsSub.addRule("announceCheck", "Announcement = true");
+		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
+		SubWithRules sWR[] = {prioritySub,nonPrioritySub,vehicleCheckSub,announcementsSub};
+		return new ServiceBusInterface(topicName, sWR);
 	}
 }

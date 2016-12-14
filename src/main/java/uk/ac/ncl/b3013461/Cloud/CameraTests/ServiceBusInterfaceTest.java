@@ -20,18 +20,30 @@ public class ServiceBusInterfaceTest
 	public static void initialseTopicTest()
 	{
 		SubWithRules prioritySub = new SubWithRules("priority");
-		prioritySub.addRule("ruleone","priority = true");
+		prioritySub.addRule("ruleone","HighPriority = true");
 		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
+		SubWithRules announcementsSub = new SubWithRules("announcements");
+		announcementsSub.addRule("announceCheck", "Announcement = true");
 		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
-		SubWithRules s[] = {prioritySub,nonPrioritySub,vehicleCheckSub};
+		SubWithRules s[] = {prioritySub,nonPrioritySub,vehicleCheckSub,announcementsSub};
 		sWR = s;
-		sBI = new ServiceBusInterface(topicName, sWR);
+		//sBI = new ServiceBusInterface(topicName, sWR);
+		sBI = ServiceBusInterface.getVanillaSBI();
 	}
 	
 	@Test //run the speedcamera test to add some messages
 	public void GetMessageTest()
 	{
-		sBI.getMessage("priority");
+		SpeedCamera sC = SpeedCamera.makeSpeedCamera("123-Dinsdale Road-Newcastle-30"); //This will send an announcement
+		for(int i = 0;i<50;i++)
+		{
+			sC.recordVehicle();
+		}
+		sC.sendRecordingBacklog();
+		System.out.println("Getting priority recording messages");
+		sBI.getSpeedCameraRecordingMessage("priority");
+		System.out.println("Getting Speed Camera Announcement messages");
+		sBI.getSpeedCameraAnnouncement("announcements");
 	}
 
 }

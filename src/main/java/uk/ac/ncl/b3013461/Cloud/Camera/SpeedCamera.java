@@ -20,6 +20,7 @@ public class SpeedCamera implements java.io.Serializable
 		speedLimit = spLimit;
 		sBI = createServiceBusInterface();
 		//announce
+		sBI.sendSpeedCameraAnnouncement(this);
 	}
 	public static SpeedCamera makeSpeedCamera(String config)
 	{
@@ -85,11 +86,13 @@ public class SpeedCamera implements java.io.Serializable
 	{
 		String topicName = "speedcameratopic";
 		SubWithRules prioritySub = new SubWithRules("priority");
-		prioritySub.addRule("ruleone","priority = true");
+		prioritySub.addRule("ruleone","HighPriority = true");
 		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
+		SubWithRules announcementsSub = new SubWithRules("announcements");
 		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
-		SubWithRules sWR[] = {prioritySub,nonPrioritySub,vehicleCheckSub};
-		return new ServiceBusInterface(topicName, sWR);
+		SubWithRules sWR[] = {prioritySub,nonPrioritySub,vehicleCheckSub,announcementsSub};
+		//return new ServiceBusInterface(topicName, sWR);
+		return ServiceBusInterface.getVanillaSBI();
 	}
 	public void sendRecordingBacklog()
 	{
@@ -105,5 +108,11 @@ public class SpeedCamera implements java.io.Serializable
 				return; //connection failed
 			}
 		}
+	}
+	@Override
+	public String toString()
+	{
+		//build your very own speed camera!
+		return this.getCameraID() + "-" + this.getStreetName() + "-" + this.getArea() + "-" + this.getSpeedLimit();
 	}
 }
