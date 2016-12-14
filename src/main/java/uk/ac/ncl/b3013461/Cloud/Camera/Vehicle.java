@@ -2,7 +2,9 @@ package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.Random;
 
-public class Vehicle implements java.io.Serializable
+import com.microsoft.azure.storage.table.TableServiceEntity;
+
+public class Vehicle extends TableServiceEntity implements java.io.Serializable
 {
 	private final String carReg;
 	private final VehicleType type;
@@ -10,6 +12,8 @@ public class Vehicle implements java.io.Serializable
 	{
 		carReg = reg;
 		type = t;
+		this.partitionKey = carReg;
+		this.rowKey = type.toString(); 
 	}
 	public String getCarReg() {
 		return carReg;

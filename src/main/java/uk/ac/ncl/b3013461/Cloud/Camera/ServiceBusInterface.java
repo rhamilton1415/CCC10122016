@@ -177,11 +177,10 @@ public class ServiceBusInterface implements java.io.Serializable
 				System.out.println(sC.toString());
 				return sC;
 			}
-			System.out.println(m.getLabel());
 		}
 		catch(Exception e)
 		{
-			System.out.println("Failure detected");
+			System.out.println(e.toString());
 		}
 		return null;
 	}

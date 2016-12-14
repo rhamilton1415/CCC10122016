@@ -3,22 +3,25 @@ package uk.ac.ncl.b3013461.Cloud.Camera;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SpeedCamera implements java.io.Serializable
+import com.microsoft.azure.storage.table.TableServiceEntity;
+
+public class SpeedCamera extends TableServiceEntity implements java.io.Serializable
 {
 	private final String cameraID;
 	private final String streetName;
 	private final String area;
 	private final int speedLimit;
-	private ServiceBusInterface sBI;
+	private static ServiceBusInterface sBI = ServiceBusInterface.getVanillaSBI();
 	private ArrayList<SpeedCameraRecording> recBackLog = new ArrayList<SpeedCameraRecording>();
 	
 	private SpeedCamera(String camID, String strName, String areaName, int spLimit)
 	{
 		cameraID = camID;
+		this.partitionKey = cameraID;
 		streetName = strName;
 		area = areaName;
 		speedLimit = spLimit;
-		sBI = createServiceBusInterface();
+		this.rowKey = streetName;
 		//announce
 		sBI.sendSpeedCameraAnnouncement(this);
 	}
@@ -81,18 +84,6 @@ public class SpeedCamera implements java.io.Serializable
 			sCR.setPriority();
 		}
 		recBackLog.add(sCR);
-	}
-	private ServiceBusInterface createServiceBusInterface()
-	{
-		String topicName = "speedcameratopic";
-		SubWithRules prioritySub = new SubWithRules("priority");
-		prioritySub.addRule("ruleone","HighPriority = true");
-		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
-		SubWithRules announcementsSub = new SubWithRules("announcements");
-		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
-		SubWithRules sWR[] = {prioritySub,nonPrioritySub,vehicleCheckSub,announcementsSub};
-		//return new ServiceBusInterface(topicName, sWR);
-		return ServiceBusInterface.getVanillaSBI();
 	}
 	public void sendRecordingBacklog()
 	{

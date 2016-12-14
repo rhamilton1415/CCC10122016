@@ -19,15 +19,6 @@ public class ServiceBusInterfaceTest
 	@BeforeClass
 	public static void initialseTopicTest()
 	{
-		SubWithRules prioritySub = new SubWithRules("priority");
-		prioritySub.addRule("ruleone","HighPriority = true");
-		SubWithRules nonPrioritySub = new SubWithRules("nonpriority");
-		SubWithRules announcementsSub = new SubWithRules("announcements");
-		announcementsSub.addRule("announceCheck", "Announcement = true");
-		SubWithRules vehicleCheckSub = new SubWithRules("vehiclecheck");
-		SubWithRules s[] = {prioritySub,nonPrioritySub,vehicleCheckSub,announcementsSub};
-		sWR = s;
-		//sBI = new ServiceBusInterface(topicName, sWR);
 		sBI = ServiceBusInterface.getVanillaSBI();
 	}
 	
