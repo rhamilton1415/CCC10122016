@@ -172,9 +172,8 @@ public class ServiceBusInterface implements java.io.Serializable
 			else if(m.getLabel().equals("Speed Camera Announcement"))
 			{
 				ObjectInputStream in = new ObjectInputStream(m.getBody());
-				SpeedCamera sC = SpeedCamera.makeSpeedCamera((String)in.readObject()); //Speed Cameras are built with these strings 
+				SpeedCamera sC = SpeedCamera.makeSpeedCamera((String) in.readObject()); //Speed Cameras are built with these strings 
 				service.deleteMessage(m);
-				System.out.println(sC.toString());
 				return sC;
 			}
 		}

@@ -2,7 +2,9 @@ package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.Random;
 
-public class SpeedCameraRecording implements java.io.Serializable
+import com.microsoft.azure.storage.table.TableServiceEntity;
+
+public class SpeedCameraRecording extends TableServiceEntity implements java.io.Serializable
 {
 	private final String camID;
 	private final Vehicle vehicle;

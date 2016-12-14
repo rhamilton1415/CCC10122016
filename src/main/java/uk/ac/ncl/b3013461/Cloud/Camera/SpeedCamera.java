@@ -23,9 +23,12 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 		speedLimit = spLimit;
 		this.rowKey = streetName;
 		//announce
-		sBI.sendSpeedCameraAnnouncement(this);
 	}
 	public static SpeedCamera makeSpeedCamera(String config)
+	{
+		return makeSpeedCamera(config,false);
+	}
+	public static SpeedCamera makeSpeedCamera(String config, boolean announce)
 	{
 		//config should be in the format: cameraID-streetName-Area-speedLimit
 		int stringIndex = 0;
@@ -57,7 +60,12 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 			stringIndex++;
 		}
 		//Check to see if this ID is already in use
-		return new SpeedCamera(newID,newStreetName,newArea,Integer.parseInt(newSpeedLimit));
+		SpeedCamera s = new SpeedCamera(newID,newStreetName,newArea,Integer.parseInt(newSpeedLimit));
+		if(announce)
+		{
+			s.announce();
+		}
+		return s;
 	}
 	public ArrayList<SpeedCameraRecording> getRecBackLog() {
 		return recBackLog;
@@ -99,6 +107,10 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 				return; //connection failed
 			}
 		}
+	}
+	public void announce()
+	{
+		sBI.sendSpeedCameraAnnouncement(this);
 	}
 	@Override
 	public String toString()

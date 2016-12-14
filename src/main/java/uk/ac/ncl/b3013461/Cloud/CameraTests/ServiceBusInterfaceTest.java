@@ -1,6 +1,6 @@
 package uk.ac.ncl.b3013461.Cloud.CameraTests;
 
-import static org.junit.Assert.*;
+import org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,5 +36,4 @@ public class ServiceBusInterfaceTest
 		System.out.println("Getting Speed Camera Announcement messages");
 		sBI.getSpeedCameraAnnouncement("announcements");
 	}
-
 }
