@@ -6,5 +6,14 @@ public class VehicleCheck {
 	{
 		
 	}
+	public static boolean isVehicleStolen(String vehicleRegistration) throws InterruptedException
+	{
+		/**
+		 * Credit Robert Hamilton exclusively
+		 * all me
+		 */
+		Thread.sleep(5000);
+		return(Math.random()<0.95);
+	}
 
 }

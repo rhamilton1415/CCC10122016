@@ -7,9 +7,11 @@ C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Camera\Ve
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\SpeedCameraConsumer.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\ConsumerTests\ConsumerTest.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Camera\SpeedCameraRecording.java
+C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\GetAllCameras.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\SpeedCameraEntry.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\PoliceMonitor.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\CameraTests\ServiceBusInterfaceTest.java
+C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\SpeedCameraRecordingEntry.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Camera\ServiceBusInterface.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Consumer\VehicleCheck.java
 C:\Users\Robert\workspace\cloud\src\main\java\uk\ac\ncl\b3013461\Cloud\Camera\SpeedCameraDeployment.java

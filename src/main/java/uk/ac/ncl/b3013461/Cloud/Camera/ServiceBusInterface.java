@@ -15,11 +15,19 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.xml.datatype.*;
+/**
+ * @author Robert
+ *
+ */
 public class ServiceBusInterface implements java.io.Serializable
 {
 	private final ServiceBusContract service;
 	private final String topicName;
 	//The constructor will try and connect to a Topic, or create one if one does not exist
+	/**
+	 * @param tN the name of the topic to be connected to or created
+	 * @param subscriptions the class SubWithRules details subscriptions and associated filters
+	 */
 	public ServiceBusInterface(String tN, SubWithRules[] subscriptions)
 	{
 		topicName = tN;
@@ -76,6 +84,10 @@ public class ServiceBusInterface implements java.io.Serializable
 	}
 	
 	//senders
+	/**This function is called when a speed camera attempts to send it's backlog. High Priority will be assigned to those vehicles which are speeding
+	 * @param sCR the recording
+	 * @return true if sending is successful, so the camera knows to delete the recording from it's backlog
+	 */
 	public boolean sendSpeedCameraMessage(SpeedCameraRecording sCR)
 	{
 		try
@@ -104,6 +116,18 @@ public class ServiceBusInterface implements java.io.Serializable
 		return true;
 	}
 	
+	/**
+	 * @param sC the speed camera to be announced
+	 * @return true if annoucement is successful
+	 */
+	/**
+	 * @param sC
+	 * @return
+	 */
+	/**
+	 * @param sC
+	 * @return
+	 */
 	public boolean sendSpeedCameraAnnouncement(SpeedCamera sC)
 	{
 		try
@@ -153,10 +177,15 @@ public class ServiceBusInterface implements java.io.Serializable
 		}
 		catch(Exception e)
 		{
-			System.out.println("No messages or Exception");
+			System.out.println(e.getMessage());
 		}
 		return null;
 	}
+	
+	/**
+	 * @param subscriptionName this determines the subscription to get a message from
+	 * @return null if no announcements, a speedcamera instance if one exists
+	 */
 	public SpeedCamera getSpeedCameraAnnouncement(String subscriptionName)
 	{
 		try
@@ -184,6 +213,7 @@ public class ServiceBusInterface implements java.io.Serializable
 		return null;
 	}
 	
+	//Use this to build the current Azure setup
 	public static ServiceBusInterface getVanillaSBI()
 	{
 		String topicName = "speedcameratopic";

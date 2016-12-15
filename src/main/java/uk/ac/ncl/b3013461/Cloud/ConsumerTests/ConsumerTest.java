@@ -24,7 +24,6 @@ public class ConsumerTest {
 	@Test
 	public void getSpeedCameraEntry()
 	{
-		sCC.getCamera("123");
+		sCC.getHistoricalSpeeding();
 	}
-
 }

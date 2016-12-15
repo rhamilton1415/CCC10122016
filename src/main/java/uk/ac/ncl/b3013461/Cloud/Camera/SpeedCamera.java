@@ -30,6 +30,18 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 	{
 		return makeSpeedCamera(config,false,0);
 	}
+	/**
+	 * @param config defines the parameters of the speed camera
+	 * @param announce should this camera be announced
+	 * @param tickrate how often does this camera get recordings
+	 * @return the new camera
+	 */
+	/**
+	 * @param config
+	 * @param announce
+	 * @param tickrate
+	 * @return
+	 */
 	public static SpeedCamera makeSpeedCamera(String config, boolean announce, long tickrate)
 	{
 		//config should be in the format: cameraID-streetName-Area-speedLimit
@@ -61,7 +73,6 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 			newSpeedLimit = newSpeedLimit + config.charAt(stringIndex);
 			stringIndex++;
 		}
-		//Check to see if this ID is already in use
 		SpeedCamera s = new SpeedCamera(newID,newStreetName,newArea,Integer.parseInt(newSpeedLimit));
 		if(announce)
 		{
@@ -88,23 +99,31 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 	public int getSpeedLimit() {
 		return speedLimit;
 	}
+	
+	/**
+	 * Generates a random Vehicle, adds it to the backlog and notifys the sendbacklog function to try and send the backlog
+	 */
 	public void recordVehicle()
 	{
 		Random r = new Random();
 		int vSpeed = (speedLimit/2)+r.nextInt(speedLimit);
 		SpeedCameraRecording sCR = new SpeedCameraRecording(this.getCameraID(),Vehicle.generateVehicle(),vSpeed);
-		if(sCR.getVehicleSpeed()>this.speedLimit)
+		if(sCR.getVehicleSpeed()>(this.speedLimit))
 		{
 			sCR.setPriority();
 		}
 		recBackLog.add(sCR);
 		if(sCR.getPriority())
 		{
-			System.out.print("HIGH PRIORITY ");
+			System.out.print("SPEEDING DETECTED ");
 		}
 		System.out.println(this.getCameraID() +" Recorded: " + sCR.getVehicle().getCarReg() + " at " + sCR.getVehicleSpeed() + "mph (Speed Limit: "+this.getSpeedLimit()+")");
 		sendRecordingBacklog();
 	}
+	
+	/**
+	 * This function will try and send all recordings in it's backlog. If the connection fails, it will try again later.
+	 */
 	public void sendRecordingBacklog()
 	{
 		for(int i = 0;i<recBackLog.size();i++)

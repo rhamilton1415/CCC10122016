@@ -22,6 +22,7 @@ public class SpeedCameraConsumer {
 	private static ServiceBusInterface sBI = ServiceBusInterface.getVanillaSBI();
 	private CloudTable cloudAnnounceT;
 	private CloudTable cloudRecordingsT;
+	private CloudTable cloudSpeedingsT;
 	public static void main(String[] args) 
 	{
 		Timer t = new Timer();
@@ -51,6 +52,11 @@ public class SpeedCameraConsumer {
 								SpeedCameraRecording sCR = sBI.getSpeedCameraRecordingMessage("priority");
 								if(sCR!=null)
 								{
+									if(sCR.getVehicleSpeed()>(sSC.getCamera(sCR.getCamID()).getSpeedLimit()*1.1)) //if the Vehicle is prioirty speeding
+									{
+										sSC.addSpeeding(sCR);
+										System.out.print("HIGH PRIORITY ");
+									}
 									System.out.println(sCR.getVehicle().getCarReg() + " " + sCR.getVehicleSpeed());
 									sSC.addRecording(sCR);
 								}
@@ -62,6 +68,9 @@ public class SpeedCameraConsumer {
 					}
 				}, 10*1000,10*1000);
 	}
+	/**
+	 * The constructor will attempt to build the tables the rest of the class will use
+	 */
 	public SpeedCameraConsumer()
 	{
 		try 
@@ -75,12 +84,19 @@ public class SpeedCameraConsumer {
 			//create the recording catcher
 			cloudRecordingsT = new CloudTable("SpeedCameraRecordings",tC);
 			cloudRecordingsT.createIfNotExists();
+			
+			cloudSpeedingsT = new CloudTable("Speedings",tC);
+			cloudSpeedingsT.createIfNotExists();
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace(System.err);
 		}
 	}
+	/**
+	 * @param sC the speed camera to be added to the azure tables
+	 * @return true if successful
+	 */
 	public boolean addCamera(SpeedCamera sC)
 	{
 		try
@@ -94,11 +110,15 @@ public class SpeedCameraConsumer {
 			return false;
 		}
 	}
+	/**
+	 * @param sCR the recording to be added to the azure tables
+	 * @return true if successful
+	 */
 	public boolean addRecording(SpeedCameraRecording sCR)
 	{
 		try
 		{
-			TableOperation tO = TableOperation.insertOrReplace(sCR);
+			TableOperation tO = TableOperation.insertOrReplace(new SpeedCameraRecordingEntry(sCR));
 			cloudAnnounceT.execute(tO);
 			return true;
 		}
@@ -107,7 +127,30 @@ public class SpeedCameraConsumer {
 			return false;
 		}
 	}
-	public boolean getCamera(String targetCamID)
+	/**
+	 * @param sCR the recording to be added to the backlog
+	 * @return true if successful
+	 */
+	public boolean addSpeeding(SpeedCameraRecording sCR)
+	{
+		try
+		{
+			
+			TableOperation tO = TableOperation.insertOrReplace(new SpeedCameraRecordingEntry(sCR));
+			cloudSpeedingsT.execute(tO);
+			System.out.println("hi");
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}		
+	}
+	/**
+	 * @param targetCamID the Camera ID of the desired camera
+	 * @return the camera from the azure tables if exists, null if not exists
+	 */
+	public SpeedCamera getCamera(String targetCamID)
 	{
 		try
 		{
@@ -118,13 +161,58 @@ public class SpeedCameraConsumer {
 			TableQuery<SpeedCameraEntry> tQ = TableQuery.from(SpeedCameraEntry.class).where(partitionFilter);
 			for(SpeedCameraEntry s : cloudAnnounceT.execute(tQ))
 			{
-				return true;
+				return SpeedCamera.makeSpeedCamera(s.toSpeedCameraConfig());
 			}
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 		}
-		return false;
+		return null;
+	}
+	/**
+	 * prints the details of all cameras in the database
+	 */
+	public void getAllCameras()
+	{
+		try
+		{
+			final String PARTITION_KEY = "PartitionKey";
+			final String ROW_KEY = "RowKey";
+			final String TIMESTAMP = "TimeStamp";
+			//String partitionFilter = TableQuery.generateFilterCondition(PARTITION_KEY, QueryComparisons.EQUAL,targetCamID);
+			//TableQuery<SpeedCameraEntry> tQ = TableQuery.from(SpeedCameraEntry.class).where(partitionFilter);
+			TableQuery<SpeedCameraEntry> tQ = TableQuery.from(SpeedCameraEntry.class);
+			for(SpeedCameraEntry s : cloudAnnounceT.execute(tQ))
+			{
+				System.out.println(SpeedCamera.makeSpeedCamera(s.toSpeedCameraConfig()));
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
+	}
+	/**
+	 * lol
+	 */
+	public void getHistoricalSpeeding()
+	{
+		try
+		{
+			final String PARTITION_KEY = "PartitionKey";
+			final String ROW_KEY = "RowKey";
+			final String TIMESTAMP = "TimeStamp";
+			TableQuery<SpeedCameraRecordingEntry> tQ = TableQuery.from(SpeedCameraRecordingEntry.class);
+			for(SpeedCameraRecordingEntry s : cloudRecordingsT.execute(tQ))
+			{
+				System.out.println(s.getVehicle());
+			}
+			System.out.println("hi");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
 	}
 }

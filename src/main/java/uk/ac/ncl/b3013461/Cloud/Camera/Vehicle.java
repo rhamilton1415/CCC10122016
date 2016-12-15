@@ -21,6 +21,10 @@ public class Vehicle extends TableServiceEntity implements java.io.Serializable
 	public VehicleType getType() {
 		return type;
 	}
+	/**
+	 * Generates a random Vehicle by generating a random reg number and using it to determine what type the vehicle will be
+	 * @return a random Vehicle
+	 */
 	public static Vehicle generateVehicle()
 	{
 		String newCarReg = getRandomLetter()+getRandomLetter()+getRandomNumber()+getRandomNumber()+getRandomLetter()+getRandomLetter()+getRandomLetter();

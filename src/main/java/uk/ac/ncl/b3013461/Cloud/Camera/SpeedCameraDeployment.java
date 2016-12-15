@@ -12,7 +12,7 @@ public class SpeedCameraDeployment {
 		ArrayList<SpeedCamera> cameras = new ArrayList<SpeedCamera>();
 		try
 		{
-			Scanner s = new Scanner(new File("src\\configs.txt"));
+			Scanner s = new Scanner(new File("src"+File.separator+"configs.txt"));
 			while(s.hasNextLine())
 			{
 				cameras.add(SpeedCamera.makeSpeedCamera(s.nextLine(),true,Long.parseLong(s.nextLine())));
