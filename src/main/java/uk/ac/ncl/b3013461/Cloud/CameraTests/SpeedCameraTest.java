@@ -14,18 +14,12 @@ public class SpeedCameraTest {
 	@BeforeClass
 	public static void init()
 	{
-		sC = SpeedCamera.makeSpeedCamera("123-Dinsdale Road-Newcastle-30",true);
+		sC = SpeedCamera.makeSpeedCamera("123-Dinsdale Road-Newcastle-30",true,10000);
 		
 	}
 	@Test
 	public void SpeedCameraInitialisetest() 
 	{
-		
-		for(int i = 0; i<50;i++)
-		{
-			sC.recordVehicle();
-			System.out.println(i);
-		}
 		
 		assertTrue(true);
 	}

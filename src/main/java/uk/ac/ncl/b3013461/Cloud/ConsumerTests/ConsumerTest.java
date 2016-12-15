@@ -18,7 +18,7 @@ public class ConsumerTest {
 	@Test
 	public void addSpeedCameraEntryTest()
 	{
-		SpeedCamera sC = SpeedCamera.makeSpeedCamera("123-Dinsdale Road-Newcastle-30",true);
+		SpeedCamera sC = SpeedCamera.makeSpeedCamera("123-Dinsdale Road-Newcastle-30",true,10000);
 		assertTrue(sCC.addCamera(sC));
 	}
 	@Test

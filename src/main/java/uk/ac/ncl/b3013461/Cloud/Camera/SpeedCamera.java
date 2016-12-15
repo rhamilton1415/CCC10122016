@@ -2,6 +2,8 @@ package uk.ac.ncl.b3013461.Cloud.Camera;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.microsoft.azure.storage.table.TableServiceEntity;
 
@@ -26,9 +28,9 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 	}
 	public static SpeedCamera makeSpeedCamera(String config)
 	{
-		return makeSpeedCamera(config,false);
+		return makeSpeedCamera(config,false,0);
 	}
-	public static SpeedCamera makeSpeedCamera(String config, boolean announce)
+	public static SpeedCamera makeSpeedCamera(String config, boolean announce, long tickrate)
 	{
 		//config should be in the format: cameraID-streetName-Area-speedLimit
 		int stringIndex = 0;
@@ -65,6 +67,10 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 		{
 			s.announce();
 		}
+		if(tickrate!=0)
+		{
+			s.tick(tickrate);
+		}
 		return s;
 	}
 	public ArrayList<SpeedCameraRecording> getRecBackLog() {
@@ -92,6 +98,12 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 			sCR.setPriority();
 		}
 		recBackLog.add(sCR);
+		if(sCR.getPriority())
+		{
+			System.out.print("HIGH PRIORITY ");
+		}
+		System.out.println(this.getCameraID() +" Recorded: " + sCR.getVehicle().getCarReg() + " at " + sCR.getVehicleSpeed() + "mph (Speed Limit: "+this.getSpeedLimit()+")");
+		sendRecordingBacklog();
 	}
 	public void sendRecordingBacklog()
 	{
@@ -108,9 +120,21 @@ public class SpeedCamera extends TableServiceEntity implements java.io.Serializa
 			}
 		}
 	}
+	private void tick(long timeout)
+	{
+		Timer t = new Timer();
+		t.scheduleAtFixedRate(new TimerTask(){
+			@Override
+			public void run()
+			{
+				recordVehicle();
+			}
+		},timeout,timeout);
+	}
 	public void announce()
 	{
 		sBI.sendSpeedCameraAnnouncement(this);
+		System.out.println("Camera " + this.getCameraID() + " on " + this.getStreetName() + ", " + this.getArea() + " deployed");
 	}
 	@Override
 	public String toString()

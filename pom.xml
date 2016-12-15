@@ -16,7 +16,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
                <classpathPrefix>lib/</classpathPrefix>
-               <mainClass>uk.ac.ncl.b3013461.Cloud.Consumer.SpeedCameraConsumer</mainClass>
+               <mainClass>uk.ac.ncl.b3013461.Cloud.Camera.SpeedCameraDeployment</mainClass>
             </manifest>
           </archive>
         </configuration>
